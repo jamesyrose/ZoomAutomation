@@ -1,19 +1,33 @@
+"""
+Logs into your zoom account (if you wish) and records the screen and audio
+
+Wrote this because I know I will miss a class here and there.
+It also servers as a reminder if I am using the computer.
+
+Also, please note that you should be asking your professor/ who ever you are recording for permission
+
+Author: James Rose
+"""
 import os
 import platform
 import time
+from datetime import datetime
 import pyautogui
 import cv2
 import numpy as np
-from datetime import datetime
 
-_cwd = os.path.dirname(os.path.abspath(__file__))
-_img = os.path.join(_cwd, "SearchImg")
-_os = platform.system() # Linux, Windows, OSX -> Darwin
 
 
 class Zoom():
-    def __init__(self, login: str, passwd: str, save_folder: str, unique_name: str):
-        self.os = platform.system() # Linux, Windows, OSX -> Darwin
+    def __init__(self, login: str, passwd: str, save_folder: str, unique_name: str, zoom_duration: int = 90):
+        """
+        :param login: Username/email
+        :param passwd: zoom password
+        :param save_folder: folder to save videos to
+        :param unique_name:  some identifying name (class?)
+        :param zoom_duration: how long is the class (minutes)
+        """
+        self.os = platform.system()  # Linux, Windows, OSX -> Darwin
         self.cwd = os.path.dirname(os.path.abspath(__file__))
         self.img_dir = os.path.join(self.cwd, "SearchImg")
         self.screen_size = pyautogui.size()  # Tuple(w, h)
@@ -21,10 +35,16 @@ class Zoom():
         self.passwd = passwd
         self.save_fol = save_folder
         self.unique_name = unique_name
+        self.duration = zoom_duration * 60 + 300  # extra 5 minutes just to be safe
 
 
     @property
     def is_zoom_open(self):
+        """
+        Checks for a zoom instance (zoom only allows one instance to be open
+
+        :return:
+        """
         if self.os in ["Darwin", "Linux"]:
             process = os.popen("ps -a | grep zoom").read()
             if len(process) > 1:
@@ -52,6 +72,18 @@ class Zoom():
         pyautogui.click()
 
     def find_img_loc(self, img_path, threshold: float = 0.99, force=False):
+        """
+        Uses a png image and compares it to a screen shot to locate certain elements
+        clicks that element
+
+        force=True will recursively try to find it by iterating with lower thresholds.
+        Not suggested to use... but its there.
+
+        :param img_path: path to png image
+        :param threshold: how similar does it need to be (i mean, you cant be perfect
+        :param force:  do you want to recursively check until it finds something
+        :return:
+        """
         def img_loc(img_path, threshold):
             match_img = cv2.imread(img_path)
             template = cv2.cvtColor(np.array(pyautogui.screenshot()),
@@ -119,6 +151,10 @@ class Zoom():
         return self
 
     def login_zoom(self):
+        """
+        Enters login information to zoom and logs into it
+        :return:
+        """
         # click login
         self.click_area_by_img("signin.png")
         time.sleep(.75)
@@ -135,6 +171,11 @@ class Zoom():
         return self
 
     def click_zoom(self):
+        """
+        Brings zoom back to the top (foreground)_
+
+        :return:
+        """
         if self.os in ["Linux", "Darwin"]:
             os.system("wmctrl -a 'Zoom -'")
         elif self.os == "Windows":
@@ -143,10 +184,26 @@ class Zoom():
             except TypeError:
                 print("Tried to raise window to foreground and failed")
 
-    def enter_meeting(self, meeting_url, meeting_password=None):
+    def enter_meeting(self, meeting_url, meeting_password=None, signed_in: bool = True):
+        """
+        Enters the meeting information and joins the meeting
+
+        Checks if zoom is open
+        Clicks the corresponding button to enter the meeting
+        Finds the sign in and types in the meeting url
+        Finds the password (if needed) and enters that
+
+        :param meeting_url:
+        :param meeting_password: if there is one
+        :param signed_in:  are you attending from a signed in account ?
+        :return:
+        """
         if not self.is_zoom_open:
             raise Exception("No Zoom Instance")
-        self.click_area_by_img("login_signed.png", threshold=.97)
+        if signed_in:
+            self.click_area_by_img("login_signed.png", threshold=.97)
+        else:
+            self.click_area_by_img('join_no_signin.png', threshold=.95)
         time.sleep(.75)
         self.click_area_by_img("join_signed.png", threshold=.95)
         time.sleep(.25)
@@ -163,6 +220,7 @@ class Zoom():
     def record_screen(self):
         """
         This is just a screen recording using ffmpeg
+        using this over zooms integrated thing to avoid hassling for permissions
 
         If you change the window, it will record that
         :return:
@@ -172,17 +230,12 @@ class Zoom():
             save_name = save_name.replace(".mov", "1.mov")
         if self.os in ["Linux", "Darwin"]:
             command = f"ffmpeg -video_size {self.screen_size[0]}x{self.screen_size[1]} -framerate 10 -f x11grab -i " \
-                      f"$DISPLAY -f alsa -ac 2 -i pulse -acodec aac -strict experimental -t 30 " \
-                      f"{save_name} "
+                      f"$DISPLAY -f alsa -ac 2 -i pulse -acodec aac -strict experimental -t {self.duration} " \
+                      f"{save_name} >/dev/null 2>&1 & "
             os.popen(command)
         elif self.os == "Windows":
-            command = f"ffmpeg -f dshow -i video='UScreenCapture':audio='Microphone' {save_name} >/dev/null 2>&1 & "
+            command = f"ffmpeg -f dshow -i video='UScreenCapture':audio='Microphone' -t {self.duration} " \
+                      f"{save_name} >/dev/null 2>&1 & "
             os.popen(command)
-
-
-
-
-
-
 
 
