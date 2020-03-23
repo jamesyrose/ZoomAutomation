@@ -1,7 +1,8 @@
+#!/usr/bin/python3
 """
 Logs into your zoom account (if you wish) and records the screen and audio
 
-Wrote this because I know I will miss a class here and there.
+Wrote this because I know I will miss a class here and there. <- Attendance can be monitored :)
 It also servers as a reminder if I am using the computer.
 
 Also, please note that you should be asking your professor/ who ever you are recording for permission
@@ -19,13 +20,15 @@ import numpy as np
 
 
 class Zoom():
-    def __init__(self, login: str, passwd: str, save_folder: str, unique_name: str, zoom_duration: int = 90):
+    def __init__(self, login: str, passwd: str, save_folder: str, unique_name: str, zoom_duration: int = 90,
+                 sleep_multiplier: int = 1):
         """
         :param login: Username/email
         :param passwd: zoom password
         :param save_folder: folder to save videos to
         :param unique_name:  some identifying name (class?)
         :param zoom_duration: how long is the class (minutes)
+        :param sleep_multiplier: if your computer is slow youll want to increase sleep times
         """
         self.os = platform.system()  # Linux, Windows, OSX -> Darwin
         self.cwd = os.path.dirname(os.path.abspath(__file__))
@@ -36,6 +39,7 @@ class Zoom():
         self.save_fol = save_folder
         self.unique_name = unique_name
         self.duration = zoom_duration * 60 + 300  # extra 5 minutes just to be safe
+        self.sleep_multi = sleep_multiplier
 
 
     @property
@@ -142,7 +146,7 @@ class Zoom():
         """
         if self.os in ["Darwin", "Linux"]:
             os.popen("zoom >/dev/null 2>&1 & ")
-            time.sleep(1)  # let app open
+            time.sleep(1 * self.sleep_multi)  # let app open
         elif self.os == "Windows":
             zoom_exe = os.path.join(os.path.expanduser("~"), "AppData", "Roaming", "Zoom", "bin", "Zoom.exe")
             os.popen(f"start {zoom_exe}")
@@ -157,7 +161,7 @@ class Zoom():
         """
         # click login
         self.click_area_by_img("signin.png")
-        time.sleep(.75)
+        time.sleep(.75 * self.sleep_multi)
         # add email/ username
         self.click_area_by_img("email_login.png")
         pyautogui.typewrite(list(self.login), interval=.025)
@@ -165,9 +169,9 @@ class Zoom():
         self.click_area_by_img("passwd_login.png")
         pyautogui.typewrite(list(self.passwd), interval=.025)
         # click login
-        time.sleep(.5)  # give it time to enter login info
+        time.sleep(.5 * self.sleep_multi)  # give it time to enter login info
         pyautogui.press('enter')
-        time.sleep(1)
+        time.sleep(1 * self.sleep_multi)
         return self
 
     def click_zoom(self):
@@ -204,16 +208,16 @@ class Zoom():
             self.click_area_by_img("login_signed.png", threshold=.97)
         else:
             self.click_area_by_img('join_no_signin.png', threshold=.95)
-        time.sleep(.75)
+        time.sleep(.75 * self.sleep_multi)
         self.click_area_by_img("join_signed.png", threshold=.95)
-        time.sleep(.25)
+        time.sleep(.25 * self.sleep_multi)
         pyautogui.typewrite(list(meeting_url), interval=.025)
-        time.sleep(.5)
+        time.sleep(.5 * self.sleep_multi)
         pyautogui.press("enter")
-        time.sleep(.75)
+        time.sleep(.75 * self.sleep_multi)
         if meeting_password is not None:
             self.click_area_by_img("signed_in_meeting_password.png", threshold=.95)
-            time.sleep(.25)
+            time.sleep(.25 * self.sleep_multi)
             pyautogui.typewrite(list(str(meeting_password)), interval=.025)
             pyautogui.press("enter")
 
