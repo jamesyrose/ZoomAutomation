@@ -53,7 +53,6 @@ class Zoom:
                 return True
             else:
                 return False
-
         elif self.os == "Windows":
             process = os.popen("tasklist | findstr Zoom.exe").read()
             if len(process) > 1:
@@ -63,7 +62,7 @@ class Zoom:
         else:
             raise OSError(f"Operating system could not be identified: {self.os}")
 
-    def click_area_by_img(self, img_name, threshold: float = 0.95):
+    def click_area_by_img(self, img_name, threshold: float = 0.9):
         loc, size = self.find_img_loc(img_path=os.path.join(self.img_dir,
                                                             img_name
                                                             ),
@@ -73,7 +72,7 @@ class Zoom:
         pyautogui.moveTo(int((loc[0] + size[0] / 2)), int((loc[1] + size[1] / 2)))
         pyautogui.click()
 
-    def find_img_loc(self, img_path, threshold: float = 0.99, force=False):
+    def find_img_loc(self, img_path, threshold: float = 0.9, force=False):
         """
         Uses a png image and compares it to a screen shot to locate certain elements
         clicks that element
@@ -206,18 +205,18 @@ class Zoom:
             raise Exception("No Zoom Instance")
         if signed_in:
             time.sleep(5 * self.sleep_multi)   #  incase the login time takes to long
-            self.click_area_by_img("login_signed.png", threshold=.95)
+            self.click_area_by_img("login_signed.png", threshold=.9)
         else:
-            self.click_area_by_img('join_no_signin.png', threshold=.95)
+            self.click_area_by_img('join_no_signin.png', threshold=.9)
         time.sleep(2 * self.sleep_multi)
-        self.click_area_by_img("join_signed.png", threshold=.95)
+        self.click_area_by_img("join_signed.png", threshold=.9)
         time.sleep(.5 * self.sleep_multi)
         pyautogui.typewrite(list(meeting_url), interval=.025)
         time.sleep(.75 * self.sleep_multi)
         pyautogui.press("enter")
         time.sleep(1 * self.sleep_multi)
         if meeting_password is not None:
-            self.click_area_by_img("signed_in_meeting_password.png", threshold=.95)
+            self.click_area_by_img("signed_in_meeting_password.png", threshold=.9)
             time.sleep(.5 * self.sleep_multi)
             pyautogui.typewrite(list(str(meeting_password)), interval=.025)
             pyautogui.press("enter")
