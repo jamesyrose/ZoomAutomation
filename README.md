@@ -68,6 +68,14 @@ Note: Virtual Boxes can be resource intensive
 ```
 58 14 * * 1,3,5 python3 ~/Documents/AutoZoom/automate_zoom.py -c ~/Documents/AutoZoom -m "0123456789" -d 60 -f ~/Documents/AutoZoom/Records -u UCSD_101 --record True --logged_in True  >/dev/null 2>&1 
 ```
+### Additional Notes: 
+This uses cv2 to compare an image to a screen shot in order to locate elements. Resizing the image led to 
+inconsistent results. If it does not work for you because it cannot find the image, you may uncomment line 93-97. 
+If it continues to not work, you can change "force=False" to "force=True" on line 77. This will search for a match until 
+it finds one (which means that it can get stuck in a loop). If push comes to shove, reference the "SearchImg"
+folder and replace them with your own. 
+
+I have tested this on Windows 10 and Linux Mint 19 and it works on both. 
 
 ### Disclaimer: 
 Be aware of "Two Party Consent" laws. In some countries/states it is illegal to record some one else with out permission. 
