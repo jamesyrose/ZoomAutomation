@@ -18,10 +18,9 @@ import cv2
 import numpy as np
 
 
-
-class Zoom():
-    def __init__(self, login: str, passwd: str, save_folder: str, unique_name: str, zoom_duration: int = 90,
-                 sleep_multiplier: int = 1):
+class Zoom:
+    def __init__(self, login: str, passwd: str, zoom_duration: int = 90,
+                 sleep_multiplier: int = 1, save_folder: str = '', unique_name: str = ''):
         """
         :param login: Username/email
         :param passwd: zoom password
@@ -40,7 +39,6 @@ class Zoom():
         self.unique_name = unique_name
         self.duration = zoom_duration * 60 + 300  # extra 5 minutes just to be safe
         self.sleep_multi = sleep_multiplier
-
 
     @property
     def is_zoom_open(self):
@@ -134,6 +132,7 @@ class Zoom():
             os.system("taskkill /IM Zoom.exe /F")
         else:
             raise OSError(f"Operating system could not be identified: {self.os}")
+        time.sleep(1 * self.sleep_multi)
         return self
 
     def launch_zoom(self):
@@ -152,6 +151,7 @@ class Zoom():
             os.popen(f"start {zoom_exe}")
         else:
             raise OSError(f"Operating system could not be identified: {self.os}")
+        time.sleep(1.5 * self.sleep_multi)
         return self
 
     def login_zoom(self):
@@ -171,7 +171,7 @@ class Zoom():
         # click login
         time.sleep(.5 * self.sleep_multi)  # give it time to enter login info
         pyautogui.press('enter')
-        time.sleep(1 * self.sleep_multi)
+        time.sleep(1 * self.sleep_multi)  # log in speed is slow
         return self
 
     def click_zoom(self):
@@ -205,19 +205,20 @@ class Zoom():
         if not self.is_zoom_open:
             raise Exception("No Zoom Instance")
         if signed_in:
-            self.click_area_by_img("login_signed.png", threshold=.97)
+            time.sleep(5 * self.sleep_multi)   #  incase the login time takes to long
+            self.click_area_by_img("login_signed.png", threshold=.95)
         else:
             self.click_area_by_img('join_no_signin.png', threshold=.95)
-        time.sleep(.75 * self.sleep_multi)
+        time.sleep(2 * self.sleep_multi)
         self.click_area_by_img("join_signed.png", threshold=.95)
-        time.sleep(.25 * self.sleep_multi)
-        pyautogui.typewrite(list(meeting_url), interval=.025)
         time.sleep(.5 * self.sleep_multi)
-        pyautogui.press("enter")
+        pyautogui.typewrite(list(meeting_url), interval=.025)
         time.sleep(.75 * self.sleep_multi)
+        pyautogui.press("enter")
+        time.sleep(1 * self.sleep_multi)
         if meeting_password is not None:
             self.click_area_by_img("signed_in_meeting_password.png", threshold=.95)
-            time.sleep(.25 * self.sleep_multi)
+            time.sleep(.5 * self.sleep_multi)
             pyautogui.typewrite(list(str(meeting_password)), interval=.025)
             pyautogui.press("enter")
 
