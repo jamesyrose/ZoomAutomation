@@ -9,9 +9,12 @@ Dont miss anything!
 * Screen Record
 
 ##### Heads Up:
-For OSX and Windows Users. 
-I did my best, you will probably have to debug it though. I assumed users
-would be running this on a Linux server.
+Sorry Apple users, I dont have a Mac.
+I did my best, you will probably have to debug it though.
+
+Windows Users: you may have to configure the ffmpeg command
+
+Linux Users: Its working on Mint19
 
 you should have a config.json file with: 
 ```
