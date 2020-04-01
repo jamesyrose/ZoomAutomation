@@ -31,7 +31,6 @@ class Zoom:
         """
         self.os = platform.system()  # Linux, Windows, OSX -> Darwin
         self.cwd = os.path.dirname(os.path.abspath(__file__))
-        self.img_dir = os.path.join(self.cwd, "SearchImg")
         self.screen_size = pyautogui.size()  # Tuple(w, h)
         self.login = login
         self.passwd = passwd
@@ -39,7 +38,10 @@ class Zoom:
         self.unique_name = unique_name
         self.duration = zoom_duration * 60 + 300  # extra 5 minutes just to be safe
         self.sleep_multi = sleep_multiplier
-
+        if self.screen_size == (3840, 2160):
+            self.img_dir = os.path.join(self.cwd, "SearchImg4k")
+        else:
+            self.img_dir = os.path.join(self.cwd, "SearchImg1080")
     @property
     def is_zoom_open(self):
         """
@@ -85,8 +87,14 @@ class Zoom:
         :param force:  do you want to recursively check until it finds something
         :return:
         """
-        def img_loc(img_path, threshold):
+        def img_loc(img_path, threshold, screen_size):
             match_img = cv2.imread(img_path)
+            # resize
+            # height = match_img.shape[0]
+            # width = match_img.shape[1]
+            # x, y = screen_size[0] / 1920, screen_size[1] / 1080
+            # new_dim = (int(width * x), int(height * y))
+            # match_img = cv2.resize(match_img, new_dim, interpolation=cv2.INTER_AREA)
             template = cv2.cvtColor(np.array(pyautogui.screenshot()),
                                     cv2.COLOR_RGB2BGR
                                     )
@@ -110,13 +118,13 @@ class Zoom:
             not_found = True
             location, size = None, None
             while not_found:
-                location, size = img_loc(img_path, threshold)
+                location, size = img_loc(img_path, threshold, self.screen_size)
                 threshold -= .01
                 if location is not None:
                     not_found = False
             return location, size
         else:
-            return img_loc(img_path, threshold)
+            return img_loc(img_path, threshold, self.screen_size)
 
     def kill_zoom(self):
         """
