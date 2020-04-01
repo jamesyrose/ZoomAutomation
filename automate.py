@@ -3,6 +3,7 @@ import os
 from time import sleep
 import argparse
 import json
+import pyautogui
 from AutoZoom import Zoom
 from seleniumDriver import getLogger
 
@@ -36,12 +37,20 @@ def attend_meeting(config_path, duration, m_id, m_pass, s_multi, fol, unique_nam
             config = json.load(open(config_path))
             user = config['username']
             passwd = config['password']
+            sys_pass = config['sys_password']
         except KeyError:
             raise ValueError("Bad JSON Config Given")
     if record:
         if fol is None or unique_name is None:
             raise ValueError("Cannot record with out a folder to save to an a name to give the video,  \n"
                              "Please pass a --unique_course_name and --save_folder argument")
+    if "inactive" not in os.popen("cinnamon-screensaver-command -q").read():
+        pyautogui.hotkey("ctrl", "alt")
+        sleep(1) 
+        pyautogui.typewrite(sys_pass, interval=.025)
+        sleep(.25)
+        pyautogui.press("enter")
+        sleep(2)
 
     # >>>>>>>>>>> Zoom
     z_obj = Zoom(login=user, passwd=passwd, zoom_duration=duration, sleep_multiplier=s_multi,
@@ -72,6 +81,8 @@ def attend_meeting(config_path, duration, m_id, m_pass, s_multi, fol, unique_nam
         while z_obj.is_zoom_open:
             sleep(10)
         os.system('pkill -f ffmpeg')
+    sleep(60 * duration) 
+    z_obj.kill_zoom()
 
 
 if __name__ == "__main__":
