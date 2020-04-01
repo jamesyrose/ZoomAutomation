@@ -44,9 +44,9 @@ pip install -r pip_requirements.txt
 
 ### Use
 ```
-python3 automate_zoom.py -c zoom_config /PATH/TO/CONFIG_FILE -m MEETING_ID  \
-        -p MEETING_PASSWORD -d MEETING_DURATION -f /PATH/TO/RECORD/SAVE_FOLDER \ 
-        -u COURSE_NAME --record True/False --logged_in True/False
+python3 automate.py -c /PATH/TO/CONFIG_FILE -m MEETING_ID -p MEETING_PASSWORD \
+                    -d MEETING_DURATION -f /PATH/TO/RECORD/SAVE_FOLDER \ 
+                    -u COURSE_NAME --record True/False --logged_in True/False
 ```
 For Further info on arguments
 ```
