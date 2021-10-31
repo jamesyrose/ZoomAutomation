@@ -11,4 +11,4 @@ PyScreeze==0.1.26
 python3-xlib==0.15
 PyTweening==1.0.3
 selenium==3.141.0
-urllib3==1.25.8
+urllib3==1.26.5
